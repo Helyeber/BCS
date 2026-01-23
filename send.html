@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Table Discovery - Firebase Trigger</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .app-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .app-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .control-panel {
+            background: var(--light-color);
+            padding: 25px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: left;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+        
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .btn-info:hover:not(:disabled) {
+            background: #138496;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+        
+        .data-panel {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .data-header {
+            padding: 20px 25px;
+            background: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .data-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .data-count {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .data-content {
+            flex: 1;
+            overflow: auto;
+            max-height: 500px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            background: var(--light-color);
+            z-index: 10;
+        }
+        
+        .data-table th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        
+        .data-table tbody tr:hover {
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .error-row {
+            background: rgba(220, 53, 69, 0.05) !important;
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+        
+        .data-footer {
+            padding: 15px 25px;
+            background: var(--light-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--secondary-color);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+        }
+        
+        .status-dot.ready {
+            background: var(--success-color);
+        }
+        
+        .status-dot.processing {
+            background: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-dot.error {
+            background: var(--danger-color);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            border-radius: var(--radius);
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            background: var(--danger-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-message {
+            background: var(--light-color);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--danger-color);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            background: var(--light-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn-sm {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .alert-error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        @media (max-width: 992px) {
+            .app-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .app-header {
+                padding: 20px;
+            }
+            
+            .app-content {
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .data-header,
+            .data-footer {
+                padding: 15px 20px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1>
+                <i class="bi bi-database"></i>
+                SQL Table Discovery
+            </h1>
+            <p>Discover table structures using Firebase as trigger system</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="app-content">
+            <!-- Left Panel: Controls -->
+            <div class="control-panel">
+                <!-- Alert Messages -->
+                <div class="alert" id="alertMessage"></div>
+                
+                <!-- Table Name Input -->
+                <div class="control-group">
+                    <label for="tableName">
+                        <i class="bi bi-table"></i>
+                        Table Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="tableName" 
+                        class="form-control" 
+                        placeholder="e.g., clients, products, users"
+                        value="clients"
+                    >
+                </div>
+                
+                <!-- Button Group -->
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="initiateQuery()" id="btnQuery">
+                        <i class="bi bi-search"></i>
+                        Execute Query
+                    </button>
+                    
+                    <button class="btn btn-info" onclick="updateData()" id="btnUpdate">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Update Data
+                    </button>
+                    
+                    <button class="btn btn-danger" onclick="clearFirebase()" id="btnClear">
+                        <i class="bi bi-trash"></i>
+                        Clear Firebase
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Data Display -->
+            <div class="data-panel">
+                <!-- Loading Overlay -->
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner"></div>
+                    <p>Processing query... Monitoring Firebase status</p>
+                </div>
+                
+                <!-- Data Header -->
+                <div class="data-header">
+                    <h3>
+                        <i class="bi bi-list-columns"></i>
+                        Firebase Data
+                    </h3>
+                    <div class="data-count" id="dataCount">0 items</div>
+                </div>
+                
+                <!-- Data Content -->
+                <div class="data-content">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th width="80">ID</th>
+                                <th>Column Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="2" style="text-align: center; padding: 40px; color: var(--secondary-color);">
+                                    No data available. Execute a query first.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Data Footer -->
+                <div class="data-footer">
+                    <div id="timestamp">Last update: --:--:--</div>
+                    <div class="status-indicator">
+                        <div class="status-dot ready" id="statusDot"></div>
+                        <span id="statusText">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="bi bi-exclamation-triangle"></i>
+                Query Error
+            </div>
+            <div class="modal-body">
+                <div class="modal-message" id="errorMessage">
+                    <!-- Error message will be inserted here -->
+                </div>
+                <p>Please resolve the error before proceeding with new queries.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" onclick="closeErrorModal()">
+                    <i class="bi bi-x-circle"></i>
+                    Close
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="resetError()">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reset & Retry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================
+        // CONFIGURATION
+        // ==============================================
+        const FIREBASE_URL = "https://alphacred-3a710-default-rtdb.firebaseio.com";
+        const FIREBASE_DATA_URL = `${FIREBASE_URL}/testes/lista-clientes`;
+        const FIREBASE_CONTROL_URL = `${FIREBASE_URL}/controle`;
+        
+        // State variables
+        let monitoringInterval = null;
+        let queryInProgress = false;
+        let lastTableQueried = null;
+        let lastQueryTimestamp = 0;
+        let currentStatus = "ready";
+
+        // DOM Elements
+        const tableNameInput = document.getElementById('tableName');
+        const btnQuery = document.getElementById('btnQuery');
+        const btnUpdate = document.getElementById('btnUpdate');
+        const btnClear = document.getElementById('btnClear');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const dataCount = document.getElementById('dataCount');
+        const tableBody = document.getElementById('tableBody');
+        const timestampEl = document.getElementById('timestamp');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const errorModal = document.getElementById('errorModal');
+        const errorMessage = document.getElementById('errorMessage');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // ==============================================
+        // STATUS MANAGEMENT
+        // ==============================================
+        function updateStatus(status, message = "") {
+            currentStatus = status;
+            statusDot.className = `status-dot ${status}`;
+            statusText.textContent = message || capitalizeFirstLetter(status);
+            
+            // Update colors based on status
+            if (status === "ready") {
+                statusText.style.color = "var(--success-color)";
+            } else if (status === "processing") {
+                statusText.style.color = "var(--warning-color)";
+            } else if (status === "error") {
+                statusText.style.color = "var(--danger-color)";
+            }
+        }
+
+        function showAlert(message, type = "success") {
+            alertMessage.textContent = message;
+            alertMessage.className = `alert alert-${type}`;
+            alertMessage.style.display = "block";
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertMessage.style.display = "none";
+            }, 5000);
+        }
+
+        // ==============================================
+        // QUERY VALIDATION & PROTECTION
+        // ==============================================
+        function canQuery(tableName) {
+            const now = Date.now();
+            
+            // Check if already processing
+            if (queryInProgress) {
+                return { 
+                    can: false, 
+                    reason: 'Please wait for the current query to complete.',
+                    code: 'BUSY' 
+                };
+            }
+            
+            // Check if same table was queried recently (5 seconds protection)
+            if (lastTableQueried === tableName) {
+                const timeElapsed = (now - lastQueryTimestamp) / 1000;
+                if (timeElapsed < 5) {
+                    const timeRemaining = Math.ceil(5 - timeElapsed);
+                    return { 
+                        can: false, 
+                        reason: `Please wait ${timeRemaining} seconds before querying the same table again.`,
+                        code: 'RPT01' 
+                    };
+                }
+            }
+            
+            return { can: true, reason: '', code: '' };
+        }
+
+        // ==============================================
+        // MAIN QUERY FUNCTION
+        // ==============================================
+        async function initiateQuery() {
+            const tableName = tableNameInput.value.trim();
+            
+            if (!tableName) {
+                showAlert('Please enter a table name.', 'error');
+                return;
+            }
+            
+            // Frontend protection check
+            const validation = canQuery(tableName);
+            if (!validation.can) {
+                showAlert(validation.reason, 'error');
+                return;
+            }
+            
+            // Disable query button
+            btnQuery.disabled = true;
+            btnQuery.innerHTML = '<i class="bi bi-hourglass-split"></i> Checking...';
+            
+            try {
+                // Check current Firebase status
+                const response = await fetch(`${FIREBASE_CONTROL_URL}/status.json`);
+                const firebaseStatus = await response.json();
+                
+                console.log('Firebase status:', firebaseStatus);
+                
+                // Only allow if status is "recebendo_dados"
+                if (firebaseStatus !== "recebendo_dados") {
+                    if (firebaseStatus === "erro") {
+                        // Load error details
+                        const errorResponse = await fetch(`${FIREBASE_CONTROL_URL}/erro.json`);
+                        const errorCode = await errorResponse.json();
+                        showErrorModal(`Previous error detected: ${errorCode || 'Unknown'}`);
+                    } else {
+                        showAlert(`System busy (status: ${firebaseStatus}). Please try again in a few seconds.`, 'error');
+                    }
+                    btnQuery.disabled = false;
+                    btnQuery.innerHTML = '<i class="bi bi-search"></i> Execute Query';
+                    return;
+                }
+                
+                // Register query locally
+                lastTableQueried = tableName;
+                lastQueryTimestamp = Date.now();
+                
+                // Send trigger to Firebase
+                console.log(`Setting trigger: ${tableName}`);
+                
+                const triggerResponse = await fetch(`${FIREBASE_CONTROL_URL}/gatilho.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tableName)
+                });
+                
+                if (!triggerResponse.ok) {
+                    throw new Error('Failed to write trigger to Firebase');
+                }
+                
+                // Start monitoring
+                queryInProgress = true;
+                updateStatus("processing", "Processing...");
+                loadingOverlay.style.display = "flex";
+                
+                // Start monitoring interval (every 3 seconds)
+                startMonitoring();
+                
+                // Disable other buttons during processing
+                btnUpdate.disabled = true;
+                btnClear.disabled = true;
+                
+            } catch (error) {
+                console.error('Query initiation error:', error);
+                showAlert(`Error: ${error.message}`, 'error');
+                btnQuery.disabled = false;
+                btnQuery.innerHTML = '<i class="bi bi-search"></i> Execute Query';
+            }
+        }
+
+        // ==============================================
+        // MONITORING FUNCTIONS - CORRIGIDO
+        // ==============================================
+        function startMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+            
+            let attempts = 0;
+            const maxAttempts = 60; // 3 minutes (60 * 3s)
+            
+            monitoringInterval = setInterval(async () => {
+                attempts++;
+                
+                try {
+                    // Check status
+                    const response = await fetch(`${FIREBASE_CONTROL_URL}/status.json`);
+                    const status = await response.json();
+                    
+                    console.log(`Monitoring [${attempts}]: ${status}`);
+                    
+                    // CORREÇÃO: Detecta sucesso quando status volta para "recebendo_dados"
+                    // Independente do status anterior
+                    if (status === "recebendo_dados") {
+                        console.log('Query completed successfully!');
+                        finishQuery(true);
+                        return;
+                    }
+                    
+                    // Error: status is "erro"
+                    if (status === "erro") {
+                        // Get error code
+                        const errorResponse = await fetch(`${FIREBASE_CONTROL_URL}/erro.json`);
+                        const errorCode = await errorResponse.json();
+                        console.log(`Error detected: ${errorCode}`);
+                        
+                        finishQuery(false, errorCode);
+                        return;
+                    }
+                    
+                    // Se ainda está "processando", continua monitorando
+                    if (status === "processando") {
+                        // Continue monitoring
+                        statusText.textContent = `Processing... (${attempts}/60)`;
+                    }
+                    
+                    // Timeout after 3 minutes
+                    if (attempts >= maxAttempts) {
+                        console.log('Monitoring timeout');
+                        finishQuery(false, "TIMEOUT: Query exceeded 3 minutes");
+                    }
+                    
+                } catch (error) {
+                    console.error('Monitoring error:', error);
+                    
+                    if (attempts >= maxAttempts) {
+                        finishQuery(false, "CONNECTION_ERROR: Monitoring failure");
+                    }
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        function finishQuery(success, errorCode = null) {
+            clearInterval(monitoringInterval);
+            monitoringInterval = null;
+            queryInProgress = false;
+            
+            loadingOverlay.style.display = "none";
+            
+            // Re-enable buttons
+            btnQuery.disabled = false;
+            btnQuery.innerHTML = '<i class="bi bi-search"></i> Execute Query';
+            btnUpdate.disabled = false;
+            btnClear.disabled = false;
+            
+            if (success) {
+                updateStatus("ready", "Query completed");
+                showAlert('Query executed successfully! Click "Update Data" to view results.', 'success');
+            } else {
+                updateStatus("error", "Query failed");
+                // Specific handling for RPT01 error
+                if (errorCode === 'RPT01') {
+                    showErrorModal('Duplicate query detected. For system protection, please wait 5 seconds between identical queries.');
+                } else if (errorCode === 'RPT02') {
+                    showErrorModal('Data available in cache. Use cached results.');
+                } else {
+                    showErrorModal(errorCode || 'Unknown error occurred');
+                }
+            }
+        }
+
+        // ==============================================
+        // DATA MANAGEMENT
+        // ==============================================
+        async function updateData() {
+            btnUpdate.disabled = true;
+            btnUpdate.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+            
+            try {
+                const response = await fetch(`${FIREBASE_DATA_URL}.json`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Clear table
+                tableBody.innerHTML = '';
+                
+                // Handle no data
+                if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="2" style="text-align: center; padding: 40px; color: var(--secondary-color);">
+                                No data available. Execute a query first.
+                            </td>
+                        </tr>
+                    `;
+                    dataCount.textContent = '0 items';
+                    timestampEl.textContent = `Last update: ${new Date().toLocaleTimeString()}`;
+                    return;
+                }
+                
+                let itemCount = 0;
+                
+                // Process array data
+                if (Array.isArray(data)) {
+                    data.forEach((item, index) => {
+                        if (item !== null) {
+                            // Verifica se é um objeto de erro
+                            if (typeof item === 'object' && item.erro) {
+                                const row = document.createElement('tr');
+                                row.className = 'error-row';
+                                row.innerHTML = `
+                                    <td>${index}</td>
+                                    <td>
+                                        <strong>ERROR ${item.erro}:</strong> ${item.descricao || 'No description'}
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            } else {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${index}</td>
+                                    <td>${item}</td>
+                                `;
+                                tableBody.appendChild(row);
+                            }
+                            itemCount++;
+                        }
+                    });
+                } else {
+                    // Process object data
+                    Object.entries(data).forEach(([key, value]) => {
+                        const row = document.createElement('tr');
+                        
+                        if (key === '0' && value && value.erro) {
+                            row.className = 'error-row';
+                            row.innerHTML = `
+                                <td>${key}</td>
+                                <td>ERROR: ${value.erro}</td>
+                            `;
+                        } else if (Array.isArray(value)) {
+                            value.forEach((item, index) => {
+                                if (item !== null) {
+                                    const subRow = document.createElement('tr');
+                                    subRow.innerHTML = `
+                                        <td>${index}</td>
+                                        <td>${item}</td>
+                                    `;
+                                    tableBody.appendChild(subRow);
+                                    itemCount++;
+                                }
+                            });
+                            return;
+                        } else {
+                            row.innerHTML = `
+                                <td>${key}</td>
+                                <td>${JSON.stringify(value)}</td>
+                            `;
+                        }
+                        
+                        tableBody.appendChild(row);
+                        itemCount++;
+                    });
+                }
+                
+                dataCount.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
+                timestampEl.textContent = `Last update: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Data update error:', error);
+                tableBody.innerHTML = `
+                    <tr class="error-row">
+                        <td colspan="2" style="text-align: center; padding: 30px;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Error loading data: ${error.message}
+                        </td>
+                    </tr>
+                `;
+                dataCount.textContent = 'Error';
+            } finally {
+                btnUpdate.disabled = false;
+                btnUpdate.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Update Data';
+            }
+        }
+
+        // ==============================================
+        // FIREBASE MANAGEMENT
+        // ==============================================
+        async function clearFirebase() {
+            if (!confirm('WARNING!\n\nAre you sure you want to DELETE ALL data from Firebase?\n\nThis action cannot be undone.')) {
+                return;
+            }
+            
+            btnClear.disabled = true;
+            btnClear.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
+            
+            try {
+                const response = await fetch(`${FIREBASE_DATA_URL}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(null)
+                });
+                
+                if (response.ok) {
+                    showAlert('Firebase data cleared successfully!', 'success');
+                    // Update display
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="2" style="text-align: center; padding: 40px; color: var(--secondary-color);">
+                                No data available. Execute a query first.
+                            </td>
+                        </tr>
+                    `;
+                    dataCount.textContent = '0 items';
+                    timestampEl.textContent = `Last update: ${new Date().toLocaleTimeString()}`;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Clear Firebase error:', error);
+                showAlert(`Error: ${error.message}`, 'error');
+            } finally {
+                btnClear.disabled = false;
+                btnClear.innerHTML = '<i class="bi bi-trash"></i> Clear Firebase';
+            }
+        }
+
+        // ==============================================
+        // ERROR MODAL FUNCTIONS
+        // ==============================================
+        function showErrorModal(message) {
+            errorMessage.textContent = `Error code: ${message}`;
+            errorModal.style.display = "flex";
+        }
+
+        function closeErrorModal() {
+            errorModal.style.display = "none";
+        }
+
+        async function resetError() {
+            try {
+                // Reset status to "recebendo_dados"
+                await fetch(`${FIREBASE_CONTROL_URL}/status.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify("recebendo_dados")
+                });
+                
+                // Clear error code
+                await fetch(`${FIREBASE_CONTROL_URL}/erro.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(0)
+                });
+                
+                // Reset trigger
+                await fetch(`${FIREBASE_CONTROL_URL}/gatilho.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(0)
+                });
+                
+                // Reset local protection
+                lastTableQueried = null;
+                lastQueryTimestamp = 0;
+                
+                errorModal.style.display = "none";
+                updateStatus("ready", "Ready");
+                showAlert('System reset. You can now try again.', 'success');
+                
+            } catch (error) {
+                console.error('Reset error:', error);
+                showAlert(`Reset failed: ${error.message}`, 'error');
+            }
+        }
+
+        // ==============================================
+        // UTILITY FUNCTIONS
+        // ==============================================
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // ==============================================
+        // INITIALIZATION
+        // ==============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize status
+            updateStatus("ready", "Ready for queries");
+            
+            // Load initial data
+            updateData();
+            
+            // Enter key support
+            tableNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    initiateQuery();
+                }
+            });
+            
+            console.log('Application initialized. Mode: Firebase Trigger');
+        });
+    </script>
+</body>
+</html>
