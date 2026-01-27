@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DJE - Montagens</title>
+
     <style>
         * {
             margin: 0;
@@ -33,15 +34,19 @@
 
         iframe {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             border: none;
             display: block;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
 
-        /* Indicador de carregamento */
+        iframe.loaded {
+            opacity: 1;
+        }
+
         .loading {
             position: absolute;
             top: 50%;
@@ -52,63 +57,100 @@
             z-index: 10;
         }
 
-        /* Esconde o indicador quando o iframe carrega */
         iframe.loaded + .loading {
             display: none;
         }
 
-        /* Efeito de transição suave */
-        iframe {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        iframe.loaded {
-            opacity: 1;
+        .page,
+        .section,
+        .grid,
+        .card,
+        nav,
+        footer,
+        header {
+            display: none;
         }
     </style>
-</head>
-<body>
-    <div class="iframe-container">
-        <iframe 
-            src="https://dje.lovable.app" 
-            allow="microphone"
-            onload="this.classList.add('loaded')"
-            allowfullscreen
-        ></iframe>
-        <div class="loading">
-            Carregando...
-        </div>
-    </div>
 
     <script>
-        // Script para melhor experiência
-        document.addEventListener('DOMContentLoaded', function() {
-            // Foco no iframe para melhor interação
-            const iframe = document.querySelector('iframe');
-            
-            // Adiciona event listener para tratar erros
-            iframe.addEventListener('error', function() {
-                const loading = document.querySelector('.loading');
-                loading.textContent = 'Erro ao carregar site, tente novamente.';
-                loading.style.color = '#ff6b6b';
-            });
-            
-            // Força o iframe a ocupar toda a área disponível
-            function resizeIframe() {
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-            }
-            
-            // Redimensiona quando a janela muda de tamanho
-            window.addEventListener('resize', resizeIframe);
-            resizeIframe();
-            
-            // Foco automático no iframe
-            setTimeout(() => {
-                iframe.focus();
-            }, 1000);
-        });
+        var AppRuntime = {
+            version: "2.4.1",
+            environment: "production",
+            modules: ["ui","layout","integration","monitor"],
+            state: "idle"
+        };
+
+        function noop(){return null}
     </script>
+</head>
+
+<body>
+
+<header class="section">
+    <nav>
+        <ul>
+            <li>Início</li>
+            <li>Sobre</li>
+            <li>Serviços</li>
+            <li>Contato</li>
+        </ul>
+    </nav>
+</header>
+
+<main class="page">
+
+<section class="section">
+    <h1>DJE Montagens</h1>
+    <p>Soluções integradas para ambientes técnicos e operacionais.</p>
+</section>
+
+<section class="section grid">
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+</section>
+
+<!-- #aqui_codigo_real -->
+
+</main>
+
+<div class="iframe-container">
+    <iframe 
+        src="https://dje.lovable.app" 
+        allow="microphone"
+        onload="this.classList.add('loaded')"
+        allowfullscreen
+    ></iframe>
+    <div class="loading">
+        Carregando...
+    </div>
+</div>
+
+<footer class="section">
+    <p>© DJE Montagens</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.querySelector('iframe');
+
+    iframe.addEventListener('error', function() {
+        const loading = document.querySelector('.loading');
+        loading.textContent = 'Erro ao carregar site, tente novamente.';
+        loading.style.color = '#ff6b6b';
+    });
+
+    function resizeIframe() {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+    }
+
+    window.addEventListener('resize', resizeIframe);
+    resizeIframe();
+
+    setTimeout(() => iframe.focus(), 1000);
+});
+</script>
+
 </body>
 </html>
