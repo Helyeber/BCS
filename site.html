@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCS SITE</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #000000;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        iframe.loaded {
+            opacity: 1;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        iframe.loaded + .loading {
+            display: none;
+        }
+
+        .page,
+        .section,
+        .grid,
+        .card,
+        nav,
+        footer,
+        header {
+            display: none;
+        }
+    </style>
+
+    <script>
+        var AppRuntime = {
+            version: "2.4.1",
+            environment: "production",
+            modules: ["ui","layout","integration","monitor"],
+            state: "idle"
+        };
+
+        function noop(){return null}
+    </script>
+</head>
+
+<body>
+
+<header class="section">
+    <nav>
+        <ul>
+            <li>Início</li>
+            <li>Sobre</li>
+            <li>Serviços</li>
+            <li>Contato</li>
+        </ul>
+    </nav>
+</header>
+
+<main class="page">
+
+<section class="section">
+    <h1>DJE Montagens</h1>
+    <p>Soluções integradas para ambientes técnicos e operacionais.</p>
+</section>
+
+<section class="section grid">
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+</section>
+
+<!-- #aqui_codigo_real -->
+
+</main>
+
+<div class="iframe-container">
+    <iframe 
+        src="https://2bcs.lovable.app" 
+        allow="microphone"
+        onload="this.classList.add('loaded')"
+        allowfullscreen
+    ></iframe>
+    <div class="loading">
+        Carregando...
+    </div>
+</div>
+
+<footer class="section">
+    <p>© DJE Montagens</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.querySelector('iframe');
+
+    iframe.addEventListener('error', function() {
+        const loading = document.querySelector('.loading');
+        loading.textContent = 'Erro ao carregar site, tente novamente.';
+        loading.style.color = '#ff6b6b';
+    });
+
+    function resizeIframe() {
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+    }
+
+    window.addEventListener('resize', resizeIframe);
+    resizeIframe();
+
+    setTimeout(() => iframe.focus(), 1000);
+});
+</script>
+
+</body>
+</html>
